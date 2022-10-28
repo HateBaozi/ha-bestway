@@ -5,7 +5,7 @@
 [![License][license-shield]](LICENSE)
 [![hacs][hacsbadge]][hacs]
 
-This custom component integrates with the Bestway cloud API, providing control of devices such as Lay-Z-Spa hot tubs.
+This custom component integrates with the Bestway cloud API and the Vaillant gizwits API, providing control of devices such as Lay-Z-Spa hot tubs and Vaillant VSmart Pro.
 
 <p float="left">
   <img src="images/demo-thermostat.png" width="200" />
@@ -19,6 +19,7 @@ You must have an account with the Bestway mobile app ([Android][bestway-android]
 
 Bestway uses different API endpoints for EU and US. If you get an error stating account could not be found, try using the other endpoint. If this does not help, then create a new account under a supported country.
 
+如果你使用的是威能VSmart Pro控制器，你需要下载并安装<a href="https://apps.apple.com/cn/app/威管家/id1465568192">威管家</a>(iOS)或者威能+(Android)，并注册账号。请注意，如果你使用中国手机号注册账号，在HA集成的配置过程中，用户名请输入 +86手机号 (前缀必须有+86)，API Location选择 CN ，才能顺利登录。
 
 ## Device Support
 
