@@ -22,6 +22,7 @@ from custom_components.bestway.bestway import (
 from .bestway import BestwayApi
 from .const import (
     CONF_API_ROOT,
+    CONF_API_ROOT_CN,
     CONF_API_ROOT_EU,
     CONF_API_ROOT_US,
     CONF_PASSWORD,
@@ -39,6 +40,7 @@ _STEP_USER_DATA_SCHEMA = vol.Schema(
         vol.Required(CONF_API_ROOT): selector.SelectSelector(
             selector.SelectSelectorConfig(
                 options=[
+                    selector.SelectOptionDict(value=CONF_API_ROOT_CN, label="CN"),
                     selector.SelectOptionDict(value=CONF_API_ROOT_EU, label="EU"),
                     selector.SelectOptionDict(value=CONF_API_ROOT_US, label="US"),
                 ]
