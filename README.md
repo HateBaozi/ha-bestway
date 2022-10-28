@@ -32,7 +32,7 @@ The integration has been developed and tested against a Lay-Z-Spa Milan Airjet P
 This integration is delivered as a HACS custom repository.
 
 1. Download and install [HACS][hacs-download].
-2. Add a [custom repository][hacs-custom] in HACS. You will need to enter the URL of this repository when prompted: `https://github.com/cdpuk/ha-bestway`.
+2. Add a [custom repository][hacs-custom] in HACS. You will need to enter the URL of this repository when prompted: `https://github.com/HateBaozi/ha-vaillant-vsmart-cn`.
 
 ## Configuration
 
@@ -56,6 +56,7 @@ Achieve faster (or even local) updates.
 ## Acknowledgements
 
 * https://github.com/B-Hartley/bruces_homeassistant_config
+* https://github.com/cdpuk/ha-bestway
 
 ## Contributing
 
