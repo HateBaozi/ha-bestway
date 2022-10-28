@@ -3,8 +3,8 @@
   "name": "Bestway",
   "version": "0.0.1",
   "config_flow": true,
-  "documentation": "https://github.com/cdpuk/ha-bestway",
-  "issue_tracker": "https://github.com/cdpuk/ha-bestway/issues",
+  "documentation": "https://github.com/HateBaozi/ha-vaillant-vsmart-cn",
+  "issue_tracker": "https://github.com/HateBaozi/ha-vaillant-vsmart-cn/issues",
   "requirements": [],
   "ssdp": [],
   "zeroconf": [],
@@ -12,7 +12,7 @@
   "homekit": {},
   "dependencies": [],
   "codeowners": [
-    "@cdpuk"
+    "@HateBaozi"
   ],
   "iot_class": "cloud_polling"
 }
