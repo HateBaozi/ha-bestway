@@ -11,7 +11,7 @@ import async_timeout
 _LOGGER = getLogger(__name__)
 _HEADERS = {
     "Content-type": "application/json; charset=UTF-8",
-    "X-Gizwits-Application-Id": "98754e684ec045528b073876c34c7348",
+    "X-Gizwits-Application-Id": "09ee617cb8634de9a947dc67fb470a23",
 }
 _TIMEOUT = 10
 
