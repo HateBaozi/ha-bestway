@@ -1,10 +1,9 @@
-"""Climate platform support."""
+"""Water Heater platform support."""
 from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature
-from homeassistant.components.climate.const import HVACAction, HVACMode
+from homeassistant.components.water_heater import WaterHeaterEntity, WaterHeaterEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_TEMPERATURE,
@@ -17,7 +16,11 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from . import BestwayUpdateCoordinator
 from .bestway import TemperatureUnit
-from .const import DOMAIN
+from .const import (
+    DHW_ON,
+    DHW_OFF,
+    DOMAIN,
+)
 from .entity import BestwayEntity
 
 
@@ -26,26 +29,25 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up climate entities."""
+    """Set up water heater entities."""
     coordinator: BestwayUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = [
-        BestwayThermostat(coordinator, config_entry, device_id)
+        BestwayWaterHeater(coordinator, config_entry, device_id)
         for device_id in coordinator.data.keys()
     ]
     async_add_entities(entities)
 
+class BestwayWaterHeater(BestwayEntity, WaterHeaterEntity):
+    """The main water heater entity for a spa."""
 
-class BestwayThermostat(BestwayEntity, ClimateEntity):
-    """The main thermostat entity for a spa."""
-
-    _attr_name = "VSmart Thermostat"
-    _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
-    _attr_hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
+    _attr_name = "VSmart Water Heater"
+    _attr_supported_features = [WaterHeaterEntityFeature.TARGET_TEMPERATURE, WaterHeaterEntityFeature.OPERATION_MODE]
+    _attr_operation_list = [DHW_ON,DHW_OFF]
     _attr_precision = PRECISION_HALVES
     _attr_target_temperature_step = 0.5
-    _attr_max_temp = 30
-    _attr_min_temp = 5
+    _attr_max_temp = 60
+    _attr_min_temp = 35
 
     def __init__(
         self,
@@ -55,38 +57,28 @@ class BestwayThermostat(BestwayEntity, ClimateEntity):
     ) -> None:
         """Initialize thermostat."""
         super().__init__(coordinator, config_entry, device_id)
-        self._attr_unique_id = f"{device_id}_thermostat"
+        self._attr_unique_id = f"{device_id}_water_heater"
 
     @property
-    def hvac_mode(self) -> HVACMode | str | None:
-        """Return the current mode (HEAT or OFF)."""
+    def operation_mode(self) ->  str | None:
+        """Return the current mode (ON or OFF)."""
         if not self.device_status:
             return None
-        return HVACMode.HEAT if self.device_status.heat_power else HVACMode.OFF
-
-    @property
-    def hvac_action(self) -> HVACAction | str | None:
-        """Return the current running action (HEATING or IDLE)."""
-        if not self.device_status:
-            return None
-        heat_on = self.device_status.heat_power
-        return (
-            HVACAction.HEATING if (heat_on and self.device_status.heat_temp_now < self.device_status.heat_temp_set) else HVACAction.IDLE
-        )
+        return DHW_ON if self.device_status.dhw_power else DHW_OFF
 
     @property
     def current_temperature(self) -> float | None:
         """Return the current temperature."""
         if not self.device_status:
             return None
-        return self.device_status.heat_temp_now
+        return self.device_status.dhw_temp_now
 
     @property
     def target_temperature(self) -> float | None:
         """Return the temperature we try to reach."""
         if not self.device_status:
             return None
-        return self.device_status.heat_temp_set
+        return self.device_status.dhw_temp_set
 
     @property
     def temperature_unit(self) -> str:
@@ -99,10 +91,10 @@ class BestwayThermostat(BestwayEntity, ClimateEntity):
         else:
             return str(TEMP_FAHRENHEIT)
 
-    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
-        """Set new target hvac mode."""
-        should_heat = True if hvac_mode == HVACMode.HEAT else False
-        await self.coordinator.api.set_heat(self.device_id, should_heat)
+    async def async_set_operation_mode(self, mode) -> None:
+        """Set new target operation mode."""
+        should_heat = True if mode == DHW_ON else False
+        await self.coordinator.api.set_dhw(self.device_id, should_heat)
         await self.coordinator.async_refresh()
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
@@ -111,5 +103,5 @@ class BestwayThermostat(BestwayEntity, ClimateEntity):
         if target_temperature is None:
             return
 
-        await self.coordinator.api.set_heat_temp(self.device_id, target_temperature)
+        await self.coordinator.api.set_dhw_temp(self.device_id, target_temperature)
         await self.coordinator.async_refresh()

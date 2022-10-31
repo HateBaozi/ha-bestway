@@ -40,16 +40,14 @@ class BestwayDeviceStatus:
     """A snapshot of the status of a device."""
 
     timestamp: int
-    temp_now: float
-    temp_set: float
+    heat_temp_now: float
+    heat_temp_set: float
     temp_set_unit: TemperatureUnit
     heat_power: bool
-    heat_temp_reach: bool
-    filter_power: bool
-    wave_power: bool
-    locked: bool
-    errors: list[int]
-    earth_fault: bool
+    dhw_temp_now: float
+    dhw_temp_set: float
+    dhw_power: bool
+    flow_temp: float
 
     @property
     def online(self) -> bool:
@@ -210,26 +208,20 @@ class BestwayApi:
                 device_attrs = latest_data["attr"]
 
                 errors = []
-                for err_num in range(1, 10):
-                    if device_attrs[f"system_err{err_num}"] == 1:
-                        errors.append(err_num)
+                #for err_num in range(1, 10):
+                #    if device_attrs[f"system_err{err_num}"] == 1:
+                #        errors.append(err_num)
 
                 device_status = BestwayDeviceStatus(
                     latest_data["updated_at"],
-                    device_attrs["temp_now"],
-                    device_attrs["temp_set"],
-                    (
-                        TemperatureUnit.CELSIUS
-                        if device_attrs["temp_set_unit"] == "摄氏"
-                        else TemperatureUnit.FAHRENHEIT
-                    ),
-                    device_attrs["heat_power"] == 1,
-                    device_attrs["heat_temp_reach"] == 1,
-                    device_attrs["filter_power"] == 1,
-                    device_attrs["wave_power"] == 1,
-                    device_attrs["locked"] == 1,
-                    errors,
-                    device_attrs["earth"] == 1,
+                    device_attrs["Room_Temperature"],
+                    device_attrs["Room_Temperature_Setpoint_Comfort"],
+                    TemperatureUnit.CELSIUS,
+                    device_attrs["Enabled_Heating"] == 1,
+                    device_attrs["Tank_temperature"],
+                    device_attrs["Current_DHW_Setpoint"],
+                    device_attrs["Enabled_DHW"] == 1,
+                    device_attrs["Flow_temperature"],                    
                 )
 
                 self._local_state_cache[did] = device_status
@@ -258,58 +250,29 @@ class BestwayApi:
         await self._do_post(
             f"{self._api_root}/app/control/{device_id}",
             headers,
-            {"attrs": {"heat_power": 1 if heat else 0}},
+            {"attrs": {"Heating_Enable": 1 if heat else 0}},
         )
         self._local_state_cache[device_id].timestamp = int(time())
         self._local_state_cache[device_id].heat_power = heat
-        if heat:
-            self._local_state_cache[device_id].filter_power = True
 
-    async def set_filter(self, device_id: str, filtering: bool) -> None:
-        """Turn the filter pump on/off."""
-        _LOGGER.debug("Setting filter mode to %s", "ON" if filtering else "OFF")
+    async def set_dhw(self, device_id: str, heat: bool) -> None:
+        """
+        Turn the DHW on/off.
+
+        Turning the DHW on will also turn on the filter pump.
+        """
+        _LOGGER.debug("Setting DHW mode to %s", "ON" if heat else "OFF")
         headers = dict(_HEADERS)
         headers["X-Gizwits-User-token"] = self._user_token
         await self._do_post(
             f"{self._api_root}/app/control/{device_id}",
             headers,
-            {"attrs": {"filter_power": 1 if filtering else 0}},
+            {"attrs": {"WarmStar_Tank_Loading_Enable": 1 if heat else 0}},
         )
         self._local_state_cache[device_id].timestamp = int(time())
-        self._local_state_cache[device_id].filter_power = filtering
-        if not filtering:
-            self._local_state_cache[device_id].wave_power = False
-            self._local_state_cache[device_id].heat_power = False
+        self._local_state_cache[device_id].dhw_power = heat
 
-    async def set_locked(self, device_id: str, locked: bool) -> None:
-        """Lock or unlock the physical control panel."""
-        _LOGGER.debug("Setting lock state to %s", "ON" if locked else "OFF")
-        headers = dict(_HEADERS)
-        headers["X-Gizwits-User-token"] = self._user_token
-        await self._do_post(
-            f"{self._api_root}/app/control/{device_id}",
-            headers,
-            {"attrs": {"locked": 1 if locked else 0}},
-        )
-        self._local_state_cache[device_id].timestamp = int(time())
-        self._local_state_cache[device_id].locked = locked
-
-    async def set_bubbles(self, device_id: str, bubbles: bool) -> None:
-        """Turn the bubbles on/off."""
-        _LOGGER.debug("Setting bubbles mode to %s", "ON" if bubbles else "OFF")
-        headers = dict(_HEADERS)
-        headers["X-Gizwits-User-token"] = self._user_token
-        await self._do_post(
-            f"{self._api_root}/app/control/{device_id}",
-            headers,
-            {"attrs": {"wave_power": 1 if bubbles else 0}},
-        )
-        self._local_state_cache[device_id].timestamp = int(time())
-        self._local_state_cache[device_id].filter_power = bubbles
-        if bubbles:
-            self._local_state_cache[device_id].filter_power = True
-
-    async def set_target_temp(self, device_id: str, target_temp: int) -> None:
+    async def set_heat_temp(self, device_id: str, target_temp: int) -> None:
         """Set the target temperature."""
         _LOGGER.debug("Setting target temperature to %d", target_temp)
         headers = dict(_HEADERS)
@@ -317,10 +280,23 @@ class BestwayApi:
         await self._do_post(
             f"{self._api_root}/app/control/{device_id}",
             headers,
-            {"attrs": {"temp_set": target_temp}},
+            {"attrs": {"Room_Temperature_Setpoint_Comfort": target_temp}},
         )
         self._local_state_cache[device_id].timestamp = int(time())
-        self._local_state_cache[device_id].temp_set = target_temp
+        self._local_state_cache[device_id].heat_temp_set = target_temp
+
+    async def set_dhw_temp(self, device_id: str, target_temp: int) -> None:
+        """Set the target temperature."""
+        _LOGGER.debug("Setting DHW temperature to %d", target_temp)
+        headers = dict(_HEADERS)
+        headers["X-Gizwits-User-token"] = self._user_token
+        await self._do_post(
+            f"{self._api_root}/app/control/{device_id}",
+            headers,
+            {"attrs": {"DHW_setpoint": target_temp}},
+        )
+        self._local_state_cache[device_id].timestamp = int(time())
+        self._local_state_cache[device_id].dhw_temp_set = target_temp
 
     async def _do_get(self, url: str, headers: dict[str, str]) -> dict[str, Any]:
         """Make an API call to the specified URL, returning the response as a JSON object."""

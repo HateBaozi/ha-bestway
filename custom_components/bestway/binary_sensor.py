@@ -1,11 +1,8 @@
 """Binary sensor platform."""
 from __future__ import annotations
 
-from typing import Any, Mapping
-
 from homeassistant.components.binary_sensor import (
     DEVICE_CLASS_CONNECTIVITY,
-    DEVICE_CLASS_PROBLEM,
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
@@ -31,7 +28,6 @@ async def async_setup_entry(
         entities.extend(
             [
                 BestwayConnectivitySensor(coordinator, config_entry, device_id),
-                BestwayErrorSensor(coordinator, config_entry, device_id),
             ]
         )
 
@@ -75,7 +71,7 @@ class BestwayConnectivitySensor(BestwayBinarySensor):
                 key="connected",
                 device_class=DEVICE_CLASS_CONNECTIVITY,
                 entity_category=EntityCategory.DIAGNOSTIC,
-                name="Spa Connected",
+                name="VSmart Connected",
             ),
         )
 
@@ -88,53 +84,3 @@ class BestwayConnectivitySensor(BestwayBinarySensor):
     def available(self) -> bool:
         """Return True, as the connectivity sensor is always available."""
         return True
-
-
-class BestwayErrorSensor(BestwayBinarySensor):
-    """Sensor to indicate an error state for a spa."""
-
-    def __init__(
-        self,
-        coordinator: BestwayUpdateCoordinator,
-        config_entry: ConfigEntry,
-        device_id: str,
-    ) -> None:
-        """Initialize sensor."""
-        super().__init__(
-            coordinator,
-            config_entry,
-            device_id,
-            BinarySensorEntityDescription(
-                key="has_error",
-                name="Spa Errors",
-                device_class=DEVICE_CLASS_PROBLEM,
-            ),
-        )
-
-    @property
-    def is_on(self) -> bool | None:
-        """Return true if the spa is reporting an error."""
-        if not self.device_status:
-            return None
-
-        return len(self.device_status.errors) > 0 or self.device_status.earth_fault
-
-    @property
-    def extra_state_attributes(self) -> Mapping[str, Any] | None:
-        """Return more detailed error information."""
-        if not self.device_status:
-            return None
-
-        errors = self.device_status.errors
-        return {
-            "e01": 1 in errors,
-            "e02": 2 in errors,
-            "e03": 3 in errors,
-            "e04": 4 in errors,
-            "e05": 5 in errors,
-            "e06": 6 in errors,
-            "e07": 7 in errors,
-            "e08": 8 in errors,
-            "e09": 9 in errors,
-            "gcf": self.device_status.earth_fault,
-        }
