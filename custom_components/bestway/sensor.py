@@ -1,4 +1,4 @@
-"""Switch platform support."""
+"""Sensor platform support."""
 from __future__ import annotations
 
 from homeassistant.components.sensor import  SensorEntity
@@ -21,7 +21,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up switch entities."""
+    """Set up sensor entities."""
     coordinator: BestwayUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = [
@@ -31,7 +31,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class BestwaySensor(BestwayEntity, SwitchEntity):
+class BestwaySensor(BestwayEntity, SensorEntity):
     """Bestway sensor entity."""
 
     _attr_name = "VSmart Flow Temperature Sensor"

@@ -39,10 +39,10 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 class BestwayWaterHeater(BestwayEntity, WaterHeaterEntity):
-    """The main water heater entity for a spa."""
+    """The main water heater entity."""
 
     _attr_name = "VSmart Water Heater"
-    _attr_supported_features = [WaterHeaterEntityFeature.TARGET_TEMPERATURE, WaterHeaterEntityFeature.OPERATION_MODE]
+    #_attr_supported_features = [WaterHeaterEntityFeature.TARGET_TEMPERATURE, WaterHeaterEntityFeature.OPERATION_MODE]
     _attr_operation_list = [DHW_ON,DHW_OFF]
     _attr_precision = PRECISION_HALVES
     _attr_target_temperature_step = 0.5
