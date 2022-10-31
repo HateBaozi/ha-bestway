@@ -36,7 +36,7 @@ class BestwaySensor(BestwayEntity, SensorEntity):
 
     _attr_name = "VSmart Flow Temperature Sensor"
     _attr_device_class = "temperature"
-    _native_unit_of_measurement = TEMP_CELSIUS
+    _unit_of_measurement = TEMP_CELSIUS
 
     def __init__(
         self,
@@ -49,7 +49,7 @@ class BestwaySensor(BestwayEntity, SensorEntity):
         self._attr_unique_id = f"{device_id}_temperature_sensor"
 
     @property
-    def update(self) -> float | None:
+    def native_value(self) -> float | None:
         """Return the flow temperature."""
         if not self.device_status:
             return None

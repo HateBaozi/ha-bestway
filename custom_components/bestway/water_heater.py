@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.water_heater import WaterHeaterEntity, WaterHeaterEntityFeature
+from homeassistant.components.water_heater import WaterHeaterEntity, WaterHeaterEntityFeature,WaterHeaterEntityEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_TEMPERATURE,
@@ -41,8 +41,10 @@ async def async_setup_entry(
 class BestwayWaterHeater(BestwayEntity, WaterHeaterEntity):
     """The main water heater entity."""
 
+    entity_description: WaterHeaterEntityEntityDescription
+    
     _attr_name = "VSmart Water Heater"
-    #_attr_supported_features = [WaterHeaterEntityFeature.TARGET_TEMPERATURE, WaterHeaterEntityFeature.OPERATION_MODE]
+    _attr_supported_features = WaterHeaterEntityFeature.TARGET_TEMPERATURE|WaterHeaterEntityFeature.OPERATION_MODE
     _attr_operation_list = [DHW_ON,DHW_OFF]
     _attr_precision = PRECISION_HALVES
     _attr_target_temperature_step = 0.5
@@ -60,7 +62,12 @@ class BestwayWaterHeater(BestwayEntity, WaterHeaterEntity):
         self._attr_unique_id = f"{device_id}_water_heater"
 
     @property
-    def operation_mode(self) ->  str | None:
+    def state(self) -> str | None:
+        """Return the current state."""
+        return self.current_operation
+
+    @property
+    def current_operation(self) ->  str | None:
         """Return the current mode (ON or OFF)."""
         if not self.device_status:
             return None
@@ -91,9 +98,9 @@ class BestwayWaterHeater(BestwayEntity, WaterHeaterEntity):
         else:
             return str(TEMP_FAHRENHEIT)
 
-    async def async_set_operation_mode(self, mode) -> None:
+    async def async_set_operation_mode(self, operation_mode: str) -> None:
         """Set new target operation mode."""
-        should_heat = True if mode == DHW_ON else False
+        should_heat = True if operation_mode == DHW_ON else False
         await self.coordinator.api.set_dhw(self.device_id, should_heat)
         await self.coordinator.async_refresh()
 
