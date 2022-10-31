@@ -28,7 +28,7 @@ _PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.CLIMATE,
     Platform.WATER_HEATER,
-    Platform.SENSORS,
+    Platform.SENSOR,
 ]
 
 
