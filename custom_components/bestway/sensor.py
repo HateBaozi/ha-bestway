@@ -36,7 +36,8 @@ class BestwaySensor(BestwayEntity, SensorEntity):
 
     _attr_name = "VSmart Flow Temperature Sensor"
     _attr_device_class = "temperature"
-    _unit_of_measurement = TEMP_CELSIUS
+    _attr_state_class = "measurement"
+    _attr_native_unit_of_measurement = TEMP_CELSIUS
 
     def __init__(
         self,
