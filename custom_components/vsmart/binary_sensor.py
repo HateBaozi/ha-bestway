@@ -11,9 +11,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import BestwayUpdateCoordinator
+from . import VSmartUpdateCoordinator
 from .const import DOMAIN
-from .entity import BestwayEntity
+from .entity import VSmartEntity
 
 
 async def async_setup_entry(
@@ -22,26 +22,26 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up binary sensor entities."""
-    coordinator: BestwayUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
-    entities: list[BestwayEntity] = []
+    coordinator: VSmartUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    entities: list[VSmartEntity] = []
     for device_id in coordinator.data.keys():
         entities.extend(
             [
-                BestwayConnectivitySensor(coordinator, config_entry, device_id),
+                VSmartConnectivitySensor(coordinator, config_entry, device_id),
             ]
         )
 
     async_add_entities(entities)
 
 
-class BestwayBinarySensor(BestwayEntity, BinarySensorEntity):
-    """Bestway binary sensor."""
+class VSmartBinarySensor(VSmartEntity, BinarySensorEntity):
+    """VSmart binary sensor."""
 
     entity_description: BinarySensorEntityDescription
 
     def __init__(
         self,
-        coordinator: BestwayUpdateCoordinator,
+        coordinator: VSmartUpdateCoordinator,
         config_entry: ConfigEntry,
         device_id: str,
         description: BinarySensorEntityDescription,
@@ -53,12 +53,12 @@ class BestwayBinarySensor(BestwayEntity, BinarySensorEntity):
         self._attr_unique_id = f"{device_id}_{description.key}"
 
 
-class BestwayConnectivitySensor(BestwayBinarySensor):
+class VSmartConnectivitySensor(VSmartBinarySensor):
     """Sensor to indicate whether a spa is currently online."""
 
     def __init__(
         self,
-        coordinator: BestwayUpdateCoordinator,
+        coordinator: VSmartUpdateCoordinator,
         config_entry: ConfigEntry,
         device_id: str,
     ) -> None:

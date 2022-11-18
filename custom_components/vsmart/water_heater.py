@@ -14,14 +14,14 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import BestwayUpdateCoordinator
-from .bestway import TemperatureUnit
+from . import VSmartUpdateCoordinator
+from .vsmart import TemperatureUnit
 from .const import (
     DHW_ON,
     DHW_OFF,
     DOMAIN,
 )
-from .entity import BestwayEntity
+from .entity import VSmartEntity
 
 
 async def async_setup_entry(
@@ -30,15 +30,15 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up water heater entities."""
-    coordinator: BestwayUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: VSmartUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = [
-        BestwayWaterHeater(coordinator, config_entry, device_id)
+        VSmartWaterHeater(coordinator, config_entry, device_id)
         for device_id in coordinator.data.keys()
     ]
     async_add_entities(entities)
 
-class BestwayWaterHeater(BestwayEntity, WaterHeaterEntity):
+class VSmartWaterHeater(VSmartEntity, WaterHeaterEntity):
     """The main water heater entity."""
 
     entity_description: WaterHeaterEntityEntityDescription
@@ -53,7 +53,7 @@ class BestwayWaterHeater(BestwayEntity, WaterHeaterEntity):
 
     def __init__(
         self,
-        coordinator: BestwayUpdateCoordinator,
+        coordinator: VSmartUpdateCoordinator,
         config_entry: ConfigEntry,
         device_id: str,
     ) -> None:

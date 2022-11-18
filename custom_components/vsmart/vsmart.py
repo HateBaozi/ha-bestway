@@ -1,4 +1,4 @@
-"""Bestway API."""
+"""VSmart API."""
 from dataclasses import dataclass
 from enum import Enum, auto
 from logging import getLogger
@@ -27,7 +27,7 @@ class TemperatureUnit(Enum):
 
 
 @dataclass
-class BestwayDevice:
+class VSmartDevice:
     """A device under a user's account."""
 
     device_id: str
@@ -36,7 +36,7 @@ class BestwayDevice:
 
 
 @dataclass
-class BestwayDeviceStatus:
+class VSmartDeviceStatus:
     """A snapshot of the status of a device."""
 
     timestamp: int
@@ -56,7 +56,7 @@ class BestwayDeviceStatus:
 
 
 @dataclass
-class BestwayUserToken:
+class VSmartUserToken:
     """User authentication token, obtained (and ideally stored) following a successful login."""
 
     user_id: str
@@ -65,18 +65,18 @@ class BestwayUserToken:
 
 
 @dataclass
-class BestwayDeviceReport:
+class VSmartDeviceReport:
     """A device report, which combines device metadata with a current status snapshot."""
 
-    device: BestwayDevice
-    status: BestwayDeviceStatus
+    device: VSmartDevice
+    status: VSmartDeviceStatus
 
 
-class BestwayException(Exception):
+class VSmartException(Exception):
     """An exception returned via the API."""
 
 
-class BestwayOfflineException(BestwayException):
+class VSmartOfflineException(VSmartException):
     """Device is offline."""
 
     def __init__(self) -> None:
@@ -84,15 +84,15 @@ class BestwayOfflineException(BestwayException):
         super().__init__("Device is offline")
 
 
-class BestwayAuthException(BestwayException):
+class VSmartAuthException(VSmartException):
     """An authentication error."""
 
 
-class BestwayUserDoesNotExistException(BestwayAuthException):
+class VSmartUserDoesNotExistException(VSmartAuthException):
     """User does not exist."""
 
 
-class BestwayIncorrectPasswordException(BestwayAuthException):
+class VSmartIncorrectPasswordException(VSmartAuthException):
     """Password is incorrect."""
 
 
@@ -101,7 +101,7 @@ async def raise_for_status(response: ClientResponse) -> None:
     if response.ok:
         return
 
-    # Try to parse out the bestway error code
+    # Try to parse out the vsmart error code
     try:
         api_error = await response.json()
     except Exception:  # pylint: disable=broad-except
@@ -109,18 +109,18 @@ async def raise_for_status(response: ClientResponse) -> None:
 
     error_code = api_error.get("error_code", 0)
     if error_code == 9005:
-        raise BestwayUserDoesNotExistException()
+        raise VSmartUserDoesNotExistException()
     if error_code == 9042:
-        raise BestwayOfflineException()
+        raise VSmartOfflineException()
     if error_code == 9020:
-        raise BestwayIncorrectPasswordException()
+        raise VSmartIncorrectPasswordException()
 
     # If we don't understand the error code, provide more detail for debugging
     response.raise_for_status()
 
 
-class BestwayApi:
-    """Bestway API."""
+class VSmartApi:
+    """VSmart API."""
 
     def __init__(self, session: ClientSession, user_token: str, api_root: str) -> None:
         """Initialize the API with a user token."""
@@ -129,7 +129,7 @@ class BestwayApi:
         self._api_root = api_root
 
         # Maps device IDs to device info
-        self._bindings: dict[str, BestwayDevice] | None = None
+        self._bindings: dict[str, VSmartDevice] | None = None
 
         # Cache containing state information for each device received from the API
         # This is used to work around an annoyance where changes to settings via
@@ -138,12 +138,12 @@ class BestwayApi:
         # When updating state via HA, we update the cache and return this value
         # until the API can provide us with a response containing a timestamp
         # more recent than the local update.
-        self._local_state_cache: dict[str, BestwayDeviceStatus] = {}
+        self._local_state_cache: dict[str, VSmartDeviceStatus] = {}
 
     @staticmethod
     async def get_user_token(
         session: ClientSession, username: str, password: str, api_root: str
-    ) -> BestwayUserToken:
+    ) -> VSmartUserToken:
         """
         Login and obtain a user token.
 
@@ -158,7 +158,7 @@ class BestwayApi:
             await raise_for_status(response)
             api_data = await response.json()
 
-        return BestwayUserToken(
+        return VSmartUserToken(
             api_data["uid"], api_data["token"], api_data["expire_at"]
         )
 
@@ -168,24 +168,24 @@ class BestwayApi:
             device.device_id: device for device in await self._get_bindings()
         }
 
-    async def _get_bindings(self) -> list[BestwayDevice]:
+    async def _get_bindings(self) -> list[VSmartDevice]:
         """Get the list of devices available in the account."""
         headers = dict(_HEADERS)
         headers["X-Gizwits-User-token"] = self._user_token
         api_data = await self._do_get(f"{self._api_root}/app/bindings", headers)
         return list(
             map(
-                lambda raw: BestwayDevice(
+                lambda raw: VSmartDevice(
                     raw["did"], raw["dev_alias"], raw["product_name"]
                 ),
                 api_data["devices"],
             )
         )
 
-    async def fetch_data(self) -> dict[str, BestwayDeviceReport]:
+    async def fetch_data(self) -> dict[str, VSmartDeviceReport]:
         """Fetch the latest data for all devices."""
 
-        results: dict[str, BestwayDeviceReport] = {}
+        results: dict[str, VSmartDeviceReport] = {}
 
         if not self._bindings:
             return results
@@ -212,7 +212,7 @@ class BestwayApi:
                 #    if device_attrs[f"system_err{err_num}"] == 1:
                 #        errors.append(err_num)
 
-                device_status = BestwayDeviceStatus(
+                device_status = VSmartDeviceStatus(
                     latest_data["updated_at"],
                     device_attrs["Room_Temperature"],
                     device_attrs["Room_Temperature_Setpoint_Comfort"],
@@ -231,7 +231,7 @@ class BestwayApi:
                     "Ignoring update for device %s as local data is newer", did
                 )
 
-            results[did] = BestwayDeviceReport(
+            results[did] = VSmartDeviceReport(
                 device_info,
                 self._local_state_cache[did],
             )

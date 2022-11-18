@@ -1,6 +1,6 @@
 {
-  "domain": "bestway",
-  "name": "Bestway",
+  "domain": "vsmart",
+  "name": "VSmart",
   "version": "0.0.1",
   "config_flow": true,
   "documentation": "https://github.com/HateBaozi/ha-vaillant-vsmart-cn",

@@ -5,17 +5,17 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import BestwayUpdateCoordinator
-from .bestway import BestwayDevice, BestwayDeviceReport, BestwayDeviceStatus
+from . import VSmartUpdateCoordinator
+from .vsmart import VSmartDevice, VSmartDeviceReport, VSmartDeviceStatus
 from .const import DOMAIN
 
 
-class BestwayEntity(CoordinatorEntity[BestwayUpdateCoordinator]):
-    """Bestway base entity type."""
+class VSmartEntity(CoordinatorEntity[VSmartUpdateCoordinator]):
+    """VSmart base entity type."""
 
     def __init__(
         self,
-        coordinator: BestwayUpdateCoordinator,
+        coordinator: VSmartUpdateCoordinator,
         config_entry: ConfigEntry,
         device_id: str,
     ) -> None:
@@ -28,19 +28,19 @@ class BestwayEntity(CoordinatorEntity[BestwayUpdateCoordinator]):
     def device_info(self) -> DeviceInfo:
         """Device information for the spa providing this entity."""
 
-        device_info: BestwayDevice = self.coordinator.data[self.device_id].device
+        device_info: VSmartDevice = self.coordinator.data[self.device_id].device
 
         return DeviceInfo(
             identifiers={(DOMAIN, self.device_id)},
             name=device_info.alias,
             model=device_info.product_name,
-            manufacturer="Bestway",
+            manufacturer="VSmart",
         )
 
     @property
-    def device_status(self) -> BestwayDeviceStatus | None:
+    def device_status(self) -> VSmartDeviceStatus | None:
         """Get status data for the spa providing this entity."""
-        device_report: BestwayDeviceReport = self.coordinator.data.get(self.device_id)
+        device_report: VSmartDeviceReport = self.coordinator.data.get(self.device_id)
         if device_report:
             return device_report.status
         return None

@@ -10,11 +10,11 @@ from homeassistant.const import (
     TEMP_CELSIUS,
 )
 
-from custom_components.bestway.bestway import BestwayApi, BestwayDeviceStatus
+from custom_components.vsmart.vsmart import VSmartApi, VSmartDeviceStatus
 
-from . import BestwayUpdateCoordinator
+from . import VSmartUpdateCoordinator
 from .const import DOMAIN
-from .entity import BestwayEntity
+from .entity import VSmartEntity
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -22,17 +22,17 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up sensor entities."""
-    coordinator: BestwayUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: VSmartUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = [
-        BestwaySensor(coordinator, config_entry, device_id)
+        VSmartSensor(coordinator, config_entry, device_id)
         for device_id in coordinator.data.keys()
     ]
     async_add_entities(entities)
 
 
-class BestwaySensor(BestwayEntity, SensorEntity):
-    """Bestway sensor entity."""
+class VSmartSensor(VSmartEntity, SensorEntity):
+    """VSmart sensor entity."""
 
     _attr_name = "VSmart Flow Temperature Sensor"
     _attr_device_class = "temperature"
@@ -41,7 +41,7 @@ class BestwaySensor(BestwayEntity, SensorEntity):
 
     def __init__(
         self,
-        coordinator: BestwayUpdateCoordinator,
+        coordinator: VSmartUpdateCoordinator,
         config_entry: ConfigEntry,
         device_id: str,
     ) -> None:

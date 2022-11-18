@@ -1,31 +1,20 @@
-# Bestway
+# VSmart
 
 [![GitHub Release][releases-shield]][releases]
 [![GitHub Activity][commits-shield]][commits]
 [![License][license-shield]](LICENSE)
 [![hacs][hacsbadge]][hacs]
 
-This custom component integrates with the Bestway cloud API and the Vaillant gizwits API, providing control of devices such as Lay-Z-Spa hot tubs and Vaillant VSmart Pro.
+这个组件从<a href="https://github.com/cdpuk/ha-bestway">BestWay</a>组件改造而来，支持威能壁挂炉通过威精灵VSmart Pro温控器接入HA，可以控制地暖温度和生活热水温度，还可以查看当前水温，威能API返回的数据比较多，更多的数据集成等我有空再说，也欢迎大家提PR。
 
 <p float="left">
   <img src="images/demo-thermostat.png" width="200" />
   <img src="images/demo-controls.png" width="200" />
-  <img src="images/demo-diagnostic.png" width="200" />
 </p>
 
-## Required Account
+## 设备与账号
 
-You must have an account with the Bestway mobile app ([Android][bestway-android]/[iOS][bestway-ios]). Lay-Z-Spa app credentials will not work. Both apps appear to have identical feature sets.
-
-Bestway uses different API endpoints for EU and US. If you get an error stating account could not be found, try using the other endpoint. If this does not help, then create a new account under a supported country.
-
-如果你使用的是威能VSmart Pro控制器，你需要下载并安装<a href="https://apps.apple.com/cn/app/威管家/id1465568192">威管家</a>(iOS)或者威能+(Android)，并注册账号。请注意，如果你使用中国手机号注册账号，在HA集成的配置过程中，用户名请输入 +86手机号 (前缀必须有+86)，API Location选择 CN ，才能顺利登录。
-
-## Device Support
-
-A Wi-Fi enabled model is required. No custom hardware is required.
-
-The integration has been developed and tested against a Lay-Z-Spa Milan Airjet Plus. It will probably also work for other AirJet models, with decreasing chances of success with other Bestway products.
+你需要确定你使用的是威能威精灵VSmart Pro温控器，下载并安装<a href="https://apps.apple.com/cn/app/威管家/id1465568192">威管家</a>(iOS)或者威能+(Android)，并注册账号。请注意，如果你使用中国手机号注册账号，在HA集成的配置过程中，用户名请输入 +86手机号 (前缀必须有+86)，API Location选择 CN ，才能顺利登录。其他国家的威能API需要有当地用户帮忙抓包。
 
 ## Installation
 
@@ -36,14 +25,14 @@ This integration is delivered as a HACS custom repository.
 
 ## Configuration
 
-Ensure you can control your device using the Bestway mobile app. At time of writing, there was also a Lay-Z-Spa branded app, but despite this being the recommended app in the installation manual, the spa could not be added. The Bestway app worked flawlessly.
+Ensure you can control your device using the VSmart mobile app. At time of writing, there was also a Lay-Z-Spa branded app, but despite this being the recommended app in the installation manual, the spa could not be added. The VSmart app worked flawlessly.
 
-* Go to **Configuration** > **Devices & Services** > **Add Integration**, then find **Bestway** in the list.
-* Enter your Bestway username and password when prompted.
+* Go to **Configuration** > **Devices & Services** > **Add Integration**, then find **VSmart** in the list.
+* Enter your VSmart username and password when prompted.
 
 ## Update speed
 
-Any changes made to the spa settings via the Bestway app or physical controls can take a short amount of time to be reflected in Home Assistant. This delay is typically under 30 seconds, but can sometimes extend to a few minutes.
+Any changes made to the spa settings via the VSmart app or physical controls can take a short amount of time to be reflected in Home Assistant. This delay is typically under 30 seconds, but can sometimes extend to a few minutes.
 
 ## Improvement ideas
 
@@ -56,23 +45,23 @@ Achieve faster (or even local) updates.
 ## Acknowledgements
 
 * https://github.com/B-Hartley/bruces_homeassistant_config
-* https://github.com/cdpuk/ha-bestway
+* https://github.com/cdpuk/ha-vsmart
 
 ## Contributing
 
 If you want to contribute to this please read the [Contribution Guidelines](CONTRIBUTING.md).
 
-[commits-shield]: https://img.shields.io/github/commit-activity/y/cdpuk/ha-bestway.svg?style=for-the-badge
-[commits]: https://github.com/cdpuk/ha-bestway/commits/main
+[commits-shield]: https://img.shields.io/github/commit-activity/y/cdpuk/ha-vsmart.svg?style=for-the-badge
+[commits]: https://github.com/cdpuk/ha-vsmart/commits/main
 [hacs]: https://github.com/custom-components/hacs
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
-[license-shield]: https://img.shields.io/github/license/cdpuk/ha-bestway.svg?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/cdpuk/ha-bestway.svg?style=for-the-badge
-[releases]: https://github.com/cdpuk/ha-bestway/releases
+[license-shield]: https://img.shields.io/github/license/cdpuk/ha-vsmart.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/cdpuk/ha-vsmart.svg?style=for-the-badge
+[releases]: https://github.com/cdpuk/ha-vsmart/releases
 [hacs-download]: https://hacs.xyz/docs/setup/download
 [hacs-custom]: https://hacs.xyz/docs/faq/custom_repositories
-[bestway-android]: https://play.google.com/store/apps/details?id=com.layzspa.smartHome
-[bestway-ios]: https://apps.apple.com/us/app/bestway-smart-hub/id1456731336
+[vsmart-android]: https://play.google.com/store/apps/details?id=com.layzspa.smartHome
+[vsmart-ios]: https://apps.apple.com/us/app/vsmart-smart-hub/id1456731336
 
 #威能VSmart API和控制命令参考
 <a href="https://docs.gizwits.com/en-us/cloud/OpenAPI.html#Overview">机制云开放平台</a>

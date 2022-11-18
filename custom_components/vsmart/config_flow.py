@@ -1,4 +1,4 @@
-"""Config flow for Bestway integration."""
+"""Config flow for VSmart integration."""
 from __future__ import annotations
 
 from logging import getLogger
@@ -14,12 +14,12 @@ from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 import voluptuous as vol
 
-from custom_components.bestway.bestway import (
-    BestwayIncorrectPasswordException,
-    BestwayUserDoesNotExistException,
+from custom_components.vsmart.vsmart import (
+    VSmartIncorrectPasswordException,
+    VSmartUserDoesNotExistException,
 )
 
-from .bestway import BestwayApi
+from .vsmart import VSmartApi
 from .const import (
     CONF_API_ROOT,
     CONF_API_ROOT_CN,
@@ -59,7 +59,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     api_root = data[CONF_API_ROOT]
     session = async_get_clientsession(hass)
     async with async_timeout.timeout(10):
-        token = await BestwayApi.get_user_token(
+        token = await VSmartApi.get_user_token(
             session, username, data[CONF_PASSWORD], api_root
         )
 
@@ -71,8 +71,8 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     }
 
 
-class BestwayConfigFlow(ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
-    """Handle a config flow for bestway."""
+class VSmartConfigFlow(ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
+    """Handle a config flow for vsmart."""
 
     VERSION = 2
 
@@ -89,9 +89,9 @@ class BestwayConfigFlow(ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
 
         try:
             info = await validate_input(self.hass, user_input)
-        except BestwayUserDoesNotExistException:
+        except VSmartUserDoesNotExistException:
             errors["base"] = "user_does_not_exist"
-        except BestwayIncorrectPasswordException:
+        except VSmartIncorrectPasswordException:
             errors["base"] = "incorrect_password"
         except ClientConnectionError:
             errors["base"] = "cannot_connect"

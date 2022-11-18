@@ -1,4 +1,4 @@
-"""The bestway integration."""
+"""The vsmart integration."""
 from __future__ import annotations
 
 from datetime import timedelta
@@ -12,7 +12,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .bestway import BestwayApi, BestwayDeviceReport
+from .vsmart import VSmartApi, VSmartDeviceReport
 from .const import (
     CONF_API_ROOT,
     CONF_API_ROOT_EU,
@@ -33,7 +33,7 @@ _PLATFORMS: list[Platform] = [
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up bestway from a config entry."""
+    """Set up vsmart from a config entry."""
     username = entry.data.get(CONF_USERNAME)
     password = entry.data.get(CONF_PASSWORD)
     api_root = entry.data.get(CONF_API_ROOT)
@@ -47,7 +47,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     else:
         _LOGGER.info("No saved token found - requesting a new one")
         try:
-            token = await BestwayApi.get_user_token(
+            token = await VSmartApi.get_user_token(
                 session, username, password, api_root
             )
         except Exception as ex:  # pylint: disable=broad-except
@@ -64,8 +64,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry, data={**entry.data, **new_config_data}
         )
 
-    api = BestwayApi(session, user_token, api_root)
-    coordinator = BestwayUpdateCoordinator(hass, api)
+    api = VSmartApi(session, user_token, api_root)
+    coordinator = VSmartUpdateCoordinator(hass, api)
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
@@ -112,20 +112,20 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return False
 
 
-class BestwayUpdateCoordinator(DataUpdateCoordinator[dict[str, BestwayDeviceReport]]):
+class VSmartUpdateCoordinator(DataUpdateCoordinator[dict[str, VSmartDeviceReport]]):
     """Update coordinator that polls the device status for all devices in an account."""
 
-    def __init__(self, hass: HomeAssistant, api: BestwayApi) -> None:
+    def __init__(self, hass: HomeAssistant, api: VSmartApi) -> None:
         """Initialize my coordinator."""
         super().__init__(
             hass,
             _LOGGER,
-            name="Bestway API",
+            name="VSmart API",
             update_interval=timedelta(seconds=30),
         )
         self.api = api
 
-    async def _async_update_data(self) -> dict[str, BestwayDeviceReport]:
+    async def _async_update_data(self) -> dict[str, VSmartDeviceReport]:
         """Fetch data from API endpoint.
 
         This is the place to pre-process the data to lookup tables

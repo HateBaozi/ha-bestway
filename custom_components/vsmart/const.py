@@ -1,6 +1,6 @@
-"""Constants for the bestway integration."""
+"""Constants for the vsmart integration."""
 
-DOMAIN = "bestway"
+DOMAIN = "vsmart"
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
 CONF_API_ROOT = "apiroot"

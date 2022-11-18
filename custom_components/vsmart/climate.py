@@ -15,10 +15,10 @@ from homeassistant.const import (
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from . import BestwayUpdateCoordinator
-from .bestway import TemperatureUnit
+from . import VSmartUpdateCoordinator
+from .vsmart import TemperatureUnit
 from .const import DOMAIN
-from .entity import BestwayEntity
+from .entity import VSmartEntity
 
 
 async def async_setup_entry(
@@ -27,16 +27,16 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up climate entities."""
-    coordinator: BestwayUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    coordinator: VSmartUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
 
     entities = [
-        BestwayThermostat(coordinator, config_entry, device_id)
+        VSmartThermostat(coordinator, config_entry, device_id)
         for device_id in coordinator.data.keys()
     ]
     async_add_entities(entities)
 
 
-class BestwayThermostat(BestwayEntity, ClimateEntity):
+class VSmartThermostat(VSmartEntity, ClimateEntity):
     """The main thermostat entity for a spa."""
 
     _attr_name = "VSmart Thermostat"
@@ -49,7 +49,7 @@ class BestwayThermostat(BestwayEntity, ClimateEntity):
 
     def __init__(
         self,
-        coordinator: BestwayUpdateCoordinator,
+        coordinator: VSmartUpdateCoordinator,
         config_entry: ConfigEntry,
         device_id: str,
     ) -> None:
