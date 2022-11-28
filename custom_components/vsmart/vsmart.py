@@ -48,11 +48,12 @@ class VSmartDeviceStatus:
     dhw_temp_set: float
     dhw_power: bool
     flow_temp: float
+    rf_status: int
 
     @property
     def online(self) -> bool:
         """Determine whether the device is online based on the age of the latest update."""
-        return self.timestamp > (time() - _CONNECTIVITY_TIMEOUT)
+        return self.rf_status == 3
 
 
 @dataclass
@@ -221,7 +222,8 @@ class VSmartApi:
                     device_attrs["Tank_temperature"],
                     device_attrs["Current_DHW_Setpoint"],
                     device_attrs["Enabled_DHW"] == 1,
-                    device_attrs["Flow_temperature"],                    
+                    device_attrs["Flow_temperature"], 
+                    device_attrs["RF_Status"],                  
                 )
 
                 self._local_state_cache[did] = device_status
