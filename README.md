@@ -45,7 +45,7 @@ Achieve faster (or even local) updates.
 ## Acknowledgements
 
 * https://github.com/B-Hartley/bruces_homeassistant_config
-* https://github.com/cdpuk/ha-vsmart
+* https://github.com/cdpuk/ha-bestway
 
 ## Contributing
 
