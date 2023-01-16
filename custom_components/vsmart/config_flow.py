@@ -6,7 +6,7 @@ from typing import Any
 
 from aiohttp import ClientConnectionError
 import async_timeout
-from homeassistant.config_entries import ConfigFlow
+from homeassistant.config_entries import ConfigFlow, OptionsFlow
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
@@ -104,7 +104,44 @@ class VSmartConfigFlow(ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
         return self.async_show_form(
             step_id="user", data_schema=_STEP_USER_DATA_SCHEMA, errors=errors
         )
+    
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        """Get the options flow for this handler."""
+        return OptionsFlowHandler(config_entry)
 
+class OptionsFlowHandler(OptionsFlow):
+    """Handles options flow for the component."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle the initial step."""
+        if user_input is None:
+            return self.async_show_form(
+                step_id="user", data_schema=_STEP_USER_DATA_SCHEMA
+            )
+
+        errors = {}
+
+        try:
+            info = await validate_input(self.hass, user_input)
+        except VSmartUserDoesNotExistException:
+            errors["base"] = "user_does_not_exist"
+        except VSmartIncorrectPasswordException:
+            errors["base"] = "incorrect_password"
+        except ClientConnectionError:
+            errors["base"] = "cannot_connect"
+        except Exception:  # pylint: disable=broad-except
+            _LOGGER.exception("Unexpected exception")
+            errors["base"] = "unknown_connection_error"
+        else:
+            return self.async_create_entry(title=info["title"], data=user_input)
+
+        return self.async_show_form(
+            step_id="user", data_schema=_STEP_USER_DATA_SCHEMA, errors=errors
+        )
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
