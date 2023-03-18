@@ -109,6 +109,8 @@ async def raise_for_status(response: ClientResponse) -> None:
         response.raise_for_status()
 
     error_code = api_error.get("error_code", 0)
+    if error_code == 9004:
+        raise VSmartAuthException()
     if error_code == 9005:
         raise VSmartUserDoesNotExistException()
     if error_code == 9042:
