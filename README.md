@@ -16,6 +16,11 @@
 
 你需要确定你使用的是威能威精灵VSmart Pro温控器，下载并安装<a href="https://apps.apple.com/cn/app/威管家/id1465568192">威管家</a>(iOS)或者威能+(Android)，并注册账号。请注意，如果你使用中国手机号注册账号，在HA集成的配置过程中，用户名请输入 +86手机号 (前缀必须有+86)，API Location选择 CN ，才能顺利登录。其他国家的威能API需要有当地用户帮忙抓包。
 
+威精灵API域名的DNS配置有问题，v6请求会返回SERVFAIL，可能会造成HA无法连接威精灵API，如果遇到提示，"Can't connect to VSmart API“，请在HA的/etc/hosts里加入一行
+139.196.31.159 api.vaillant.com.cn
+
+具体的IP可以通过nslookup或者dig确定
+
 ## Installation
 
 This integration is delivered as a HACS custom repository.
