@@ -6,8 +6,8 @@ from typing import Any
 
 from aiohttp import ClientConnectionError
 import async_timeout
-from homeassistant.config_entries import ConfigFlow, OptionsFlow
-from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry, ConfigFlow, OptionsFlow
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import selector
@@ -106,14 +106,20 @@ class VSmartConfigFlow(ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
         )
     
     @staticmethod
+    @callback
     def async_get_options_flow(config_entry):
-        """Get the options flow for this handler."""
-        return OptionsFlowHandler(config_entry)
+        return VSmartOptionsFlowHandler(config_entry)
 
-class OptionsFlowHandler(OptionsFlow):
-    """Handles options flow for the component."""
+class VSmartOptionsFlowHandler(OptionsFlow):
+    def __init__(self, config_entry: ConfigEntry) -> None:        
+        """Initialize options flow."""
+        self.config_entry = config_entry
 
-    async def async_step_init(
+    async def async_step_init(self, _user_input=None):
+        """Manage the options."""
+        return await self.async_step_user()
+
+    async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
