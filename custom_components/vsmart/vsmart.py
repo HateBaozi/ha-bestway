@@ -8,6 +8,17 @@ from typing import Any
 from aiohttp import ClientResponse, ClientSession
 import async_timeout
 
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.exceptions import ConfigEntryNotReady
+
+from .const import (
+    CONF_PASSWORD,
+    CONF_USER_TOKEN,
+    CONF_USER_TOKEN_EXPIRY,
+    CONF_USERNAME,
+)
+
 _LOGGER = getLogger(__name__)
 _HEADERS = {
     "Content-type": "application/json; charset=UTF-8",
@@ -125,8 +136,10 @@ async def raise_for_status(response: ClientResponse) -> None:
 class VSmartApi:
     """VSmart API."""
 
-    def __init__(self, session: ClientSession, user_token: str, api_root: str) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, session: ClientSession, user_token: str, api_root: str) -> None:
         """Initialize the API with a user token."""
+        self._hass = hass
+        self._config_entry = entry
         self._session = session
         self._user_token = user_token
         self._api_root = api_root
@@ -144,9 +157,7 @@ class VSmartApi:
         self._local_state_cache: dict[str, VSmartDeviceStatus] = {}
 
     @staticmethod
-    async def get_user_token(
-        session: ClientSession, username: str, password: str, api_root: str
-    ) -> VSmartUserToken:
+    async def get_user_token(session: ClientSession, username: str, password: str, api_root: str) -> VSmartUserToken:
         """
         Login and obtain a user token.
 
@@ -303,27 +314,42 @@ class VSmartApi:
         self._local_state_cache[device_id].dhw_temp_set = target_temp
 
     async def _do_get(self, url: str, headers: dict[str, str]) -> dict[str, Any]:
+        return await self._make_request("GET", url, headers)
+    
+    async def _do_post(self, url: str, headers: dict[str, str], body: dict[str, Any]) -> dict[str, Any]:
+        return await self._make_request("POST", url, headers, body)
+    
+    async def _make_request(self, method: str, url: str, headers: dict[str, str], body: dict[str, Any] = None) -> dict[str, Any]:
         """Make an API call to the specified URL, returning the response as a JSON object."""
         async with async_timeout.timeout(_TIMEOUT):
-            response = await self._session.get(url, headers=headers)
-            response.raise_for_status()
+            if method == "POST":
+                response = await self._session.post(url, headers=headers, json=body)
+            else:
+                response = await self._session.get(url, headers=headers)
 
-            # All API responses are encoded using JSON, however the headers often incorrectly
-            # state 'text/html' as the content type.
-            # We have to disable the check to avoid an exception.
-            response_json: dict[str, Any] = await response.json(content_type=None)
-            return response_json
+            _LOGGER.debug(f"METHOD={method},URL={url}, HEADER={headers}, BODY={body}")
 
-    async def _do_post(
-        self, url: str, headers: dict[str, str], body: dict[str, Any]
-    ) -> dict[str, Any]:
-        """Make an API call to the specified URL, returning the response as a JSON object."""
-        async with async_timeout.timeout(_TIMEOUT):
-            response = await self._session.post(url, headers=headers, json=body)
-            await raise_for_status(response)
+            try:
+                await raise_for_status(response)
+                return await response.json(content_type=None)
+            except VSmartAuthException:
+                try:
+                    # 更新 token
+                    token = await self.get_user_token(self._session, self._config_entry.data.get(CONF_USERNAME), self._config_entry.data.get(CONF_PASSWORD), self._api_root)
+                    user_token = token.user_token
+                    user_token_expiry = token.expiry
 
-            # All API responses are encoded using JSON, however the headers often incorrectly
-            # state 'text/html' as the content type.
-            # We have to disable the check to avoid an exception.
-            response_json: dict[str, Any] = await response.json(content_type=None)
-            return response_json
+                    new_config_data = {
+                        CONF_USER_TOKEN: user_token,
+                        CONF_USER_TOKEN_EXPIRY: user_token_expiry,
+                    }
+
+                    self._hass.config_entries.async_update_entry(
+                        self._config_entry, data={**self._config_entry.data, **new_config_data}
+                    )
+
+                    self._user_token = user_token
+
+                    return await self._make_request(method, url, headers, body)
+                except Exception as ex:
+                    raise ConfigEntryNotReady from ex

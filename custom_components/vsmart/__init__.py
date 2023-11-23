@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+import time
 from logging import getLogger
 
 import async_timeout
@@ -42,7 +43,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     session = async_get_clientsession(hass)
 
-    if user_token:
+    if user_token and user_token_expiry > time.time():
         _LOGGER.info("Reusing existing access token")
     else:
         _LOGGER.info("No saved token found - requesting a new one")
@@ -64,7 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             entry, data={**entry.data, **new_config_data}
         )
 
-    api = VSmartApi(session, user_token, api_root)
+    api = VSmartApi(hass, entry, session, user_token, api_root)
     coordinator = VSmartUpdateCoordinator(hass, api)
     await coordinator.async_config_entry_first_refresh()
 
