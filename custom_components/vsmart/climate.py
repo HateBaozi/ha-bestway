@@ -40,7 +40,7 @@ class VSmartThermostat(VSmartEntity, ClimateEntity):
     """The main thermostat entity for a spa."""
 
     _attr_name = "VSmart Thermostat"
-    _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
+    _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
     _attr_hvac_modes = [HVACMode.OFF, HVACMode.HEAT]
     _attr_precision = PRECISION_HALVES
     _attr_target_temperature_step = 0.5
