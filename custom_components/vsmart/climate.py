@@ -59,7 +59,7 @@ class VSmartThermostat(VSmartEntity, ClimateEntity):
 
     @property
     def supported_features(self):
-        return ClimateEntityFeature.SUPPORT_TARGET_TEMPERATURE | ClimateEntityFeature.SUPPORT_PRESET_MODE
+        return ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.PRESET_MODE
 
     @property
     def hvac_mode(self) -> HVACMode | str | None:
