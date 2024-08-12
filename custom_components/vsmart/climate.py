@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature
-from homeassistant.components.climate.const import HVACAction, HVACMode
+from homeassistant.components.climate.const import HVACAction, HVACMode, ClimateEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_TEMPERATURE,
@@ -56,6 +56,10 @@ class VSmartThermostat(VSmartEntity, ClimateEntity):
         """Initialize thermostat."""
         super().__init__(coordinator, config_entry, device_id)
         self._attr_unique_id = f"{device_id}_thermostat"
+
+    @property
+    def supported_features(self):
+        return ClimateEntityFeature.SUPPORT_TARGET_TEMPERATURE | ClimateEntityFeature.SUPPORT_PRESET_MODE
 
     @property
     def hvac_mode(self) -> HVACMode | str | None:
