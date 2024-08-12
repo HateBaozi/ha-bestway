@@ -199,6 +199,9 @@ class VSmartApi:
     async def fetch_data(self) -> dict[str, VSmartDeviceReport]:
         """Fetch the latest data for all devices."""
 
+        headers = dict(_HEADERS)
+        headers["X-Gizwits-User-token"] = self._user_token
+
         results: dict[str, VSmartDeviceReport] = {}
 
         if not self._bindings:
@@ -206,7 +209,7 @@ class VSmartApi:
 
         for did, device_info in self._bindings.items():
             latest_data = await self._do_get(
-                f"{self._api_root}/app/devdata/{did}/latest", _HEADERS
+                f"{self._api_root}/app/devdata/{did}/latest", headers
             )
 
             # Work out whether the received API update is more recent than the
