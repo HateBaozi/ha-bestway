@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 from homeassistant.components.binary_sensor import (
-    DEVICE_CLASS_CONNECTIVITY,
+    BinarySensorDeviceClass,
     BinarySensorEntity,
     BinarySensorEntityDescription,
 )
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
@@ -69,7 +70,7 @@ class VSmartConnectivitySensor(VSmartBinarySensor):
             device_id,
             BinarySensorEntityDescription(
                 key="connected",
-                device_class=DEVICE_CLASS_CONNECTIVITY,
+                device_class=BinarySensorDeviceClass.CONNECTIVITY,
                 entity_category=EntityCategory.DIAGNOSTIC,
                 name="VSmart Connected",
             ),

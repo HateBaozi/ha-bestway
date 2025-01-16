@@ -334,8 +334,13 @@ class VSmartApi:
 
             try:
                 await raise_for_status(response)
-                return await response.json(content_type=None)
+                # 记录响应状态码和内容
+                response_data = await response.json(content_type=None)
+                _LOGGER.debug(f"RESPONSE STATUS={response.status}, RESPONSE BODY={response_data}")
+                return response_data
+
             except VSmartAuthException:
+                _LOGGER.warning("VSmartAuthException encountered, attempting to refresh token.")
                 try:
                     # 更新 token
                     token = await self.get_user_token(self._session, self._config_entry.data.get(CONF_USERNAME), self._config_entry.data.get(CONF_PASSWORD), self._api_root)
