@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from homeassistant.const import (
-    TEMP_CELSIUS,
+    UnitOfTemperature,
 )
 
 from custom_components.vsmart.vsmart import VSmartApi, VSmartDeviceStatus
@@ -37,7 +37,7 @@ class VSmartSensor(VSmartEntity, SensorEntity):
     _attr_name = "VSmart Flow Temperature Sensor"
     _attr_device_class = "temperature"
     _attr_state_class = "measurement"
-    _attr_native_unit_of_measurement = TEMP_CELSIUS
+    _attr_native_unit_of_measurement = UnitOfTemperature.CELSIUS
 
     def __init__(
         self,

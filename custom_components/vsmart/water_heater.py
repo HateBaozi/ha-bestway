@@ -8,8 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     ATTR_TEMPERATURE,
     PRECISION_HALVES,
-    TEMP_CELSIUS,
-    TEMP_FAHRENHEIT,
+    UnitOfTemperature,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -94,9 +93,9 @@ class VSmartWaterHeater(VSmartEntity, WaterHeaterEntity):
             not self.device_status
             or self.device_status.temp_set_unit == TemperatureUnit.CELSIUS
         ):
-            return str(TEMP_CELSIUS)
+            return str(UnitOfTemperature.CELSIUS)
         else:
-            return str(TEMP_FAHRENHEIT)
+            return str(UnitOfTemperature.FAHRENHEIT)
 
     async def async_set_operation_mode(self, operation_mode: str) -> None:
         """Set new target operation mode."""
